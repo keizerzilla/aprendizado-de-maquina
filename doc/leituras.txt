@@ -1,0 +1,6 @@
+Perceptron Learning Algorithm: A Graphical Explanation Of Why It Works
+https://towardsdatascience.com/perceptron-learning-algorithm-d5db0deab975
+
+Perceptron: The Artificial Neuron
+https://towardsdatascience.com/perceptron-the-artificial-neuron-4d8c70d5cc8d
+
