@@ -80,31 +80,40 @@ class NeuralNet:
             matches:
         """
         
-        test_results = [(np.argmax(self.predict(x)), np.argmax(y)) for x, y in zip(X_test, y_test)]
-        matches = sum(int(x == y) for x, y in test_results)
+        matches = 0
+        for a, u in zip(X_test, y_test):
+            a = np.reshape(a, (-1, 1))
+            u = np.reshape(u, (-1, 1))
+            
+            out1 = np.argmax(self.predict(a))
+            out2 = np.argmax(u)
+            
+            if out1 == out2:
+                matches = matches + 1
+        
         return matches
     
-    def cost_derivative(self, output_activations, y):
+    def cost_derivative(self, output_activations, u):
         """
         Parâmetros
         ----------
             output_activations:
-            y:
+            u:
         
         Retorno
         -------
             d:
         """
         
-        d = output_activations - y
+        d = output_activations - u
         return d
     
-    def backpropagation(self, x, y):
+    def backpropagation(self, a, u):
         """
         Parâmetros
         ----------
-            x:
-            y:
+            a:
+            u:
         
         Retorno
         -------
@@ -112,10 +121,13 @@ class NeuralNet:
             nabla_w:
         """
         
+        a = np.reshape(a, (-1, 1))
+        u = np.reshape(u, (-1, 1))
+        
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        activation = x
-        activations = [x]
+        activation = a
+        activations = [a]
         zs = []
         
         for b, w in zip(self.biases, self.weights):
@@ -124,7 +136,7 @@ class NeuralNet:
             activation = self.sigmoid(z)
             activations.append(activation)
         
-        delta = self.cost_derivative(activations[-1], y) * self.sigmoid_prime(zs[-1])
+        delta = self.cost_derivative(activations[-1], u) * self.sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].T)
         
@@ -137,11 +149,12 @@ class NeuralNet:
         
         return nabla_b, nabla_w
     
-    def update(self, batch, eta):
+    def update(self, X, y, eta):
         """
         Parâmetros
         ----------
-            batch:
+            X:
+            y:
             eta:
         
         Retorno
@@ -152,20 +165,20 @@ class NeuralNet:
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         
-        for x, y in batch:
-            delta_nabla_b, delta_nabla_w = self.backpropagation(x, y)
+        for a, u in zip(X, y):
+            delta_nabla_b, delta_nabla_w = self.backpropagation(a, u)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         
-        self.weights = [w - (eta / len(batch)) * nw for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b - (eta / len(batch)) * nb for b, nb in zip(self.biases, nabla_b)]
+        self.weights = [w - (eta / X.shape[0]) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta / X.shape[0]) * nb for b, nb in zip(self.biases, nabla_b)]
     
     def fit(self, X_train, y_train, epochs, batch_size, eta):
         """
         Parâmetros
         ----------
-            X_train: lista de arrays numpy com os dados de entrada.
-            y_train: vetor coluna de mesma dimensão da camada de saída com as saídas esperadas.
+            X_train: matriz de dimensão (n_amostras, n_atributos)
+            y_train: matriz de dimensão (n_amostras, n_saidas)
             epochs: número de interações de treinamento.
             batch_size: tamanho das subdivisões do conjunto de treinamendo para o GDE.
             eta: taxa de aprendizado.
@@ -175,14 +188,18 @@ class NeuralNet:
             Nenhum.
         """
         
-        training_data = list(zip(X_train, y_train))
-        n = len(training_data)
+        if X_train.shape[0] != y_train.shape[0]:
+            raise Exception("Número de amostras não batem!")
         
-        for j in range(epochs):
-            random.shuffle(training_data)
-            batches = [training_data[i:i+batch_size] for i in range(0, n, batch_size)]
-            for batch in batches:
-                self.update(batch, eta)
+        n_samples = X_train.shape[0]
+        
+        for i in range(epochs):
+            p = np.random.permutation(n_samples)
+            X_train = X_train[p]
+            y_train = y_train[p]
+            
+            for j in range(0, n_samples, batch_size):
+                self.update(X_train[j:j+batch_size], y_train[j:j+batch_size], eta)
             
             if self.verbose:
-                print(f"Epoch {j+1}: complete")
+                print(f"Epoch {i+1}: complete")

@@ -1,1 +1,1 @@
-numpy pandas scikit-learn
+numpy pandas
