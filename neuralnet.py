@@ -48,6 +48,7 @@ class NeuralNet:
         -------
             sigma_p:
         """
+        
         sigma_p = self.sigmoid(z) * (1.0 - self.sigmoid(z))
         return sigma_p
     

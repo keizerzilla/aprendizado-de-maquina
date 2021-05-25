@@ -12,3 +12,7 @@ Estudos em redes neurais e aprendizagem profunda. Referência principal no momen
 ## Dependências
 
 Verificar arquivo `requirements.txt`
+
+## Status
+
+Esse projeto será retomado do início de um curso livre e popular de Inteligência Artificial. Próximas atualizações em julho/2021.
