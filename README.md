@@ -17,7 +17,7 @@ pip3 install --upgrade -r requirements.txt
 - Funcionalidades de debug amigáveis.
 - Visualização da rede (ex: arquitetura geral, treinamento, predição).
 
-### algoritmos_geneticos
+### `algoritmos_geneticos`
 
 - A listar...
 
